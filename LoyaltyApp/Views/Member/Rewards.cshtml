@@ -1,0 +1,173 @@
+@model List<LoyaltyApp.DTOs.RewardDTO>
+@{
+    ViewData["Title"] = "Rewards Store";
+    var member = ViewBag.Member as LoyaltyApp.DTOs.MemberDTO;
+    var userPoints = member?.Point ?? 0;
+}
+
+<div class="container py-4">
+    <!-- Header with Point Balance -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">Points Marketplace</span>
+                <h1 class="h3 fw-bold text-dark mb-1">Rewards Catalog 🎁</h1>
+                <p class="text-muted small mb-0">Use your accumulated loyalty points to redeem drinks, merchandise, and vouchers.</p>
+            </div>
+            <div class="text-md-end p-3 bg-light rounded-4 border">
+                <span class="text-muted small fw-semibold text-uppercase d-block">Your Point Balance</span>
+                <span class="fs-3 fw-bold text-primary">⭐ @userPoints</span> <span class="small text-muted">Pts</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Grid -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var reward in Model)
+            {
+                var cost = reward.Point ?? 0;
+                var canAfford = userPoints >= cost;
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden hover-card">
+                        <div class="p-4 bg-light text-center border-bottom" style="min-height: 140px; display: flex; align-items: center; justify-content: center;">
+                            <span class="fs-1">🎁</span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold">
+                                    ⭐ @cost Pts
+                                </span>
+                                <span class="badge @(reward.Status == "Active" ? "bg-success-subtle text-success" : "bg-secondary-subtle text-secondary") rounded-pill px-2 py-1 small">
+                                    @(reward.Status ?? "Active")
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-1">@reward.Title</h5>
+                            <p class="text-muted small mb-3">@reward.Description</p>
+
+                            @if (!string.IsNullOrEmpty(reward.TnC))
+                            {
+                                <div class="bg-light p-2 rounded-3 small text-muted mb-3" style="font-size: 0.75rem;">
+                                    <strong>T&C:</strong> @reward.TnC
+                                </div>
+                            }
+
+                            <div class="mt-auto pt-3 border-top">
+                                @if (canAfford)
+                                {
+                                    <button class="btn btn-primary rounded-pill w-100 fw-semibold redeem-btn"
+                                            data-guid="@reward.RewardGUID"
+                                            data-title="@reward.Title"
+                                            data-cost="@cost">
+                                        Redeem with @cost Points
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary rounded-pill w-100 disabled" style="opacity: 0.65;">
+                                        Need @(cost - userPoints) More Points
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
+                    <div class="fs-1 mb-2">🎁</div>
+                    <h5>No rewards currently available</h5>
+                    <p class="small mb-0">Check back soon for new treats and gifts!</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Confirm Reward Redemption -->
+<div class="modal fade" id="redeemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Confirm In-Store Redemption</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-light rounded-4 mb-4 text-center">
+                    <span class="text-muted small d-block">Item to Redeem:</span>
+                    <h5 id="modalRewardTitle" class="fw-bold text-primary mb-1">-</h5>
+                    <span id="modalRewardCost" class="badge bg-primary text-white rounded-pill px-3 py-1">0 Pts</span>
+                </div>
+
+                <form id="redeemForm">
+                    <input type="hidden" id="modalRewardGUID" name="RewardGUID" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Your Member Password</label>
+                        <input type="password" id="modalMemberPassword" name="MemberPassword" class="form-control rounded-pill px-3" placeholder="Enter your login password" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Cashier Staff PIN 🔑</label>
+                        <input type="password" id="modalStaffPin" name="OutletStaffPin" class="form-control rounded-pill px-3 text-center fw-bold fs-5 tracking-wider" placeholder="123456" maxlength="6" required />
+                        <div class="form-text small text-muted">Please ask the store counter staff to enter their 6-digit PIN.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="confirmRedeemBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">Confirm Redemption</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('.redeem-btn').click(function () {
+        const guid = $(this).data('guid');
+        const title = $(this).data('title');
+        const cost = $(this).data('cost');
+
+        $('#modalRewardGUID').val(guid);
+        $('#modalRewardTitle').text(title);
+        $('#modalRewardCost').text(cost + ' Points');
+        $('#redeemForm')[0].reset();
+        $('#modalRewardGUID').val(guid);
+
+        new bootstrap.Modal(document.getElementById('redeemModal')).show();
+    });
+
+    $('#redeemForm').submit(function (e) {
+        e.preventDefault();
+        const $btn = $('#confirmRedeemBtn');
+        $btn.prop('disabled', true).text('Processing...');
+
+        $.post('/Member/RedeemReward', $(this).serialize(), function (res) {
+            $btn.prop('disabled', false).text('Confirm Redemption');
+            if (res.success) {
+                $('#redeemModal').modal('hide');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Redeemed Successfully! 🎉',
+                    text: res.msg,
+                    confirmButtonColor: '#0d6efd'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire('Redemption Failed', res.msg, 'error');
+            }
+        }).fail(function () {
+            $btn.prop('disabled', false).text('Confirm Redemption');
+            Swal.fire('Error', 'Unable to complete redemption at this time.', 'error');
+        });
+    });
+</script>
+}
+

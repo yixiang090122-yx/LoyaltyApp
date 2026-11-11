@@ -1,0 +1,149 @@
+@model List<LoyaltyApp.DTOs.HistoryRecordDTO>
+@{
+    ViewData["Title"] = "Activity History";
+}
+
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">Audit Trail</span>
+                <h1 class="h3 fw-bold text-dark mb-1">Transaction History 📜</h1>
+                <p class="text-muted small mb-0">Consolidated record of your point transactions, voucher claims, and gift redemptions.</p>
+            </div>
+            <!-- Search & Filters -->
+            <div class="d-flex gap-2">
+                <input type="text" id="historySearch" class="form-control rounded-pill px-3" placeholder="Search description..." style="max-width: 240px;" />
+                <select id="typeFilter" class="form-select rounded-pill px-3" style="width: auto;">
+                    <option value="all">All Types</option>
+                    <option value="point">Points Only</option>
+                    <option value="voucher">Vouchers Only</option>
+                    <option value="reward">Rewards Only</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="historyTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 140px;">Type</th>
+                        <th>Details / Description</th>
+                        <th>Date & Time</th>
+                        <th>Points Impact</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model.OrderByDescending(x => x.Date))
+                        {
+                            var typeClass = item.RecordType.ToString().ToLower();
+                            <tr class="history-row" data-type="@typeClass">
+                                <td>
+                                    @if (item.RecordType == LoyaltyApp.DTOs.HistoryType.Point)
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                                            ⭐ Points
+                                        </span>
+                                    }
+                                    else if (item.RecordType == LoyaltyApp.DTOs.HistoryType.Voucher)
+                                    {
+                                        <span class="badge bg-warning-subtle text-dark rounded-pill px-3 py-2 fw-semibold">
+                                            🎟️ Voucher
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold">
+                                            🎁 Reward
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">
+                                        @if (item.VoucherDetail != null)
+                                        {
+                                            @item.VoucherDetail.VoucherName
+                                        }
+                                        else if (item.RewardDetail != null)
+                                        {
+                                            @item.RewardDetail.Title
+                                        }
+                                        else
+                                        {
+                                            @(item.Description ?? "Points Transaction")
+                                        }
+                                    </div>
+                                    <span class="text-muted small">Ref: <code class="text-secondary">@(item.RecordGUID ?? item.RecordID.ToString())</code></span>
+                                </td>
+                                <td class="text-muted small">
+                                    @(item.Date?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                </td>
+                                <td>
+                                    @if (item.Points.HasValue && item.Points > 0)
+                                    {
+                                        <span class="fw-bold text-success">+@item.Points Pts</span>
+                                    }
+                                    else if (item.Points.HasValue && item.Points < 0)
+                                    {
+                                        <span class="fw-bold text-danger">@item.Points Pts</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-1">
+                                        @(item.Status ?? (item.Claim == true ? "Claimed" : "Completed"))
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <div class="fs-1 mb-2">📜</div>
+                                <div>No transactions recorded yet.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function filterHistory() {
+        const query = $('#historySearch').val().toLowerCase().trim();
+        const type = $('#typeFilter').val().toLowerCase();
+
+        $('.history-row').each(function () {
+            const rowType = $(this).data('type');
+            const rowText = $(this).text().toLowerCase();
+
+            const matchQuery = !query || rowText.includes(query);
+            const matchType = (type === 'all') || (rowType === type);
+
+            if (matchQuery && matchType) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    $('#historySearch').on('input', filterHistory);
+    $('#typeFilter').on('change', filterHistory);
+</script>
+}
+

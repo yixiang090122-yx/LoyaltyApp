@@ -1,0 +1,170 @@
+@model List<LoyaltyApp.DTOs.VoucherDTO>
+@{
+    ViewData["Title"] = "Manage Vouchers";
+}
+
+<div class="container-fluid py-4 px-4 bg-light min-vh-100">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/Admin/Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Dashboard</a>
+                <h1 class="h3 fw-bold text-dark mb-0">Discount Vouchers 🎟️</h1>
+            </div>
+            <p class="text-muted small mt-1 mb-0">Configure promotional vouchers, discounts, and welcome rewards issued to loyalty members.</p>
+        </div>
+
+        <button class="btn btn-primary shadow-sm rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#createVoucherModal">
+            + Issue New Voucher
+        </button>
+    </div>
+
+    <!-- Vouchers Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">#ID</th>
+                        <th>Voucher Name / Title</th>
+                        <th>Tag</th>
+                        <th>Valid Until</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var v in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-muted">#@v.VoucherID</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@v.VoucherName</div>
+                                    <span class="text-muted small">@v.Title | @v.Description</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning-subtle text-dark rounded-pill px-3 py-1 fw-bold">
+                                        @(v.ShortTitle ?? "Voucher")
+                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    @(v.ExpiredDate?.ToString("yyyy-MM-dd") ?? "Ongoing")
+                                </td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">
+                                        @(v.VoucherStatus ?? "Active")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-voucher-btn"
+                                            data-id="@v.VoucherID"
+                                            data-name="@v.VoucherName">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <div class="fs-1 mb-2">🎟️</div>
+                                <div>No vouchers found. Click <strong>+ Issue New Voucher</strong> above to create one.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Voucher -->
+<div class="modal fade" id="createVoucherModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Issue New Voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="createVoucherForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Voucher Name</label>
+                        <input type="text" name="VoucherName" class="form-control rounded-pill px-3" placeholder="e.g. 10% Off First Meal" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Headline Title</label>
+                        <input type="text" name="Title" class="form-control rounded-pill px-3" placeholder="e.g. Welcome Feast!" required />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Subtitle</label>
+                            <input type="text" name="Subtitle" class="form-control rounded-pill px-3" placeholder="e.g. Enjoy 10% off order" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Badge Label</label>
+                            <input type="text" name="ShortTitle" class="form-control rounded-pill px-3" placeholder="e.g. 10% Off" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="Description" class="form-control rounded-4 p-3" rows="2" placeholder="Discount details and instructions..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Terms & Conditions</label>
+                        <input type="text" name="TNC" class="form-control rounded-pill px-3" placeholder="e.g. Minimum spend RM20. Dine-in only." />
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveVoucherBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">Issue Voucher</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('#createVoucherForm').submit(function (e) {
+        e.preventDefault();
+        $('#saveVoucherBtn').prop('disabled', true).text('Issuing...');
+        $.post('/Admin/CreateVoucher', $(this).serialize(), function (res) {
+            $('#saveVoucherBtn').prop('disabled', false).text('Issue Voucher');
+            if (res.success) {
+                Swal.fire('Issued', res.msg, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', res.msg, 'error');
+            }
+        });
+    });
+
+    $('.delete-voucher-btn').click(function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        Swal.fire({
+            title: 'Delete ' + name + '?',
+            text: 'This will remove the voucher from all member wallets.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, delete'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/Admin/DeleteVoucher/' + id, function (res) {
+                    if (res.success) {
+                        Swal.fire('Deleted', res.msg, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', res.msg, 'error');
+                    }
+                });
+            }
+        });
+    });
+</script>
+}
+

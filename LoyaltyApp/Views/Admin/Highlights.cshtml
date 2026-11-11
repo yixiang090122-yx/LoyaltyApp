@@ -1,0 +1,158 @@
+@model List<LoyaltyApp.DTOs.HighlightDTO>
+@{
+    ViewData["Title"] = "Promotional Banners";
+}
+
+<div class="container-fluid py-4 px-4 bg-light min-vh-100">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/Admin/Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Dashboard</a>
+                <h1 class="h3 fw-bold text-dark mb-0">Homepage Banners & Highlights 🔥</h1>
+            </div>
+            <p class="text-muted small mt-1 mb-0">Manage rotating carousel slides and promotional headlines displayed on the customer mobile app home screen.</p>
+        </div>
+
+        <button class="btn btn-primary shadow-sm rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#createHighlightModal">
+            + Add Promotional Banner
+        </button>
+    </div>
+
+    <!-- Highlights Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">#ID</th>
+                        <th>Banner Title / Subtitle</th>
+                        <th>Description</th>
+                        <th>Period</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var h in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-muted">#@h.HighlightID</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@h.Title</div>
+                                    <span class="text-primary small">@h.SubTitle</span>
+                                </td>
+                                <td class="small text-muted" style="max-width: 300px;">
+                                    @h.Description
+                                </td>
+                                <td class="small text-muted">
+                                    @(h.CreateDate?.ToString("yyyy-MM-dd") ?? "-") to @(h.ExpireDate?.ToString("yyyy-MM-dd") ?? "Ongoing")
+                                </td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">
+                                        @(h.Status ?? "Active")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-highlight-btn"
+                                            data-id="@h.HighlightID"
+                                            data-title="@h.Title">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <div class="fs-1 mb-2">🔥</div>
+                                <div>No promotion banners found. Click <strong>+ Add Promotional Banner</strong> to create one.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Highlight -->
+<div class="modal fade" id="createHighlightModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Add Homepage Banner</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="createHighlightForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Headline Title</label>
+                        <input type="text" name="Title" class="form-control rounded-pill px-3" placeholder="e.g. New Seasonal Menu - Flavors of Asia" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subtitle</label>
+                        <input type="text" name="SubTitle" class="form-control rounded-pill px-3" placeholder="e.g. Limited time only" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="Description" class="form-control rounded-4 p-3" rows="3" placeholder="Try our chef's latest creations inspired by bold Asian flavors." required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Terms & Conditions</label>
+                        <input type="text" name="TnC" class="form-control rounded-pill px-3" placeholder="e.g. Subject to availability at participating outlets." />
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveHighlightBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">Publish Banner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('#createHighlightForm').submit(function (e) {
+        e.preventDefault();
+        $('#saveHighlightBtn').prop('disabled', true).text('Publishing...');
+        $.post('/Admin/CreateHighlight', $(this).serialize(), function (res) {
+            $('#saveHighlightBtn').prop('disabled', false).text('Publish Banner');
+            if (res.success) {
+                Swal.fire('Published', res.msg, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', res.msg, 'error');
+            }
+        });
+    });
+
+    $('.delete-highlight-btn').click(function () {
+        const id = $(this).data('id');
+        const title = $(this).data('title');
+
+        Swal.fire({
+            title: 'Delete ' + title + '?',
+            text: 'This will remove the banner from the customer homepage.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, delete'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/Admin/DeleteHighlight/' + id, function (res) {
+                    if (res.success) {
+                        Swal.fire('Deleted', res.msg, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', res.msg, 'error');
+                    }
+                });
+            }
+        });
+    });
+</script>
+}
+

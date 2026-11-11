@@ -1,0 +1,143 @@
+@{
+    ViewData["Title"] = "Redemption Records Audit";
+    var vouchers = ViewBag.VoucherRedemptions as List<LoyaltyApp.DTOs.VoucherAssignDTO> ?? new List<LoyaltyApp.DTOs.VoucherAssignDTO>();
+    var rewards = ViewBag.RewardRedemptions as List<LoyaltyApp.DTOs.RewardAssignDTO> ?? new List<LoyaltyApp.DTOs.RewardAssignDTO>();
+}
+
+<div class="container-fluid py-4 px-4 bg-light min-vh-100">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/Admin/Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Dashboard</a>
+                <h1 class="h3 fw-bold text-dark mb-0">Redemption Audit Trail 📜</h1>
+            </div>
+            <p class="text-muted small mt-1 mb-0">Historical logs of all voucher claims and physical rewards redeemed across branches.</p>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-pills mb-4 gap-2" id="redemptionTabs">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill px-4 fw-semibold" data-bs-toggle="pill" data-bs-target="#vouchersTab">
+                🎟️ Voucher Redemptions (@vouchers.Count)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4 fw-semibold" data-bs-toggle="pill" data-bs-target="#rewardsTab">
+                🎁 Reward Redemptions (@rewards.Count)
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Vouchers Tab -->
+        <div class="tab-pane fade show active" id="vouchersTab">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">#ID</th>
+                                <th>Voucher Title</th>
+                                <th>Claimed Member</th>
+                                <th>Redeemed Branch</th>
+                                <th>Cashier Staff</th>
+                                <th class="text-end">Redeem Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (vouchers.Any())
+                            {
+                                @foreach (var v in vouchers)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold text-muted">#@v.VoucherRecordID</td>
+                                        <td class="fw-bold text-dark">
+                                            @v.VoucherName
+                                            <div class="text-muted small">@v.Title</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@v.MemberName</div>
+                                            <span class="text-muted small">@v.MemberPhoneNumber</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">📍 @(v.OutletName ?? "Main Branch")</span>
+                                        </td>
+                                        <td class="small">
+                                            👨‍💼 @(v.OutletStaffName ?? "Cashier")
+                                        </td>
+                                        <td class="text-end small text-muted">
+                                            @(v.RedeemDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">No voucher claims recorded.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rewards Tab -->
+        <div class="tab-pane fade" id="rewardsTab">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">#ID</th>
+                                <th>Reward Name / Title</th>
+                                <th>Claimed Member</th>
+                                <th>Redeemed Branch</th>
+                                <th>Cashier Staff</th>
+                                <th class="text-end">Redeem Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (rewards.Any())
+                            {
+                                @foreach (var r in rewards)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold text-muted">#@r.RewardRecordID</td>
+                                        <td class="fw-bold text-dark">
+                                            @r.RewardTitle
+                                            <div class="text-muted small">@r.RewardName</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@r.MemberName</div>
+                                            <span class="text-muted small">@r.MemberPhoneNumber</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">📍 @(r.OutletName ?? "Main Branch")</span>
+                                        </td>
+                                        <td class="small">
+                                            👨‍💼 @(r.OutletStaffName ?? "Cashier")
+                                        </td>
+                                        <td class="text-end small text-muted">
+                                            @(r.RedeemDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">No gift redemptions recorded.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

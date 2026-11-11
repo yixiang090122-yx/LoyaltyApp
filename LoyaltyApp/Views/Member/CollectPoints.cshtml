@@ -1,0 +1,131 @@
+@{
+    ViewData["Title"] = "Collect Points";
+    var outlets = ViewBag.Outlets as List<LoyaltyApp.DTOs.OutletDTO> ?? new List<LoyaltyApp.DTOs.OutletDTO>();
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2 align-self-start">In-Store Points Accrual</span>
+                <h1 class="h3 fw-bold text-dark mb-1">Earn Loyalty Points ⭐</h1>
+                <p class="text-muted small mb-0">Show your dynamic request code to the cashier at checkout to accumulate reward points.</p>
+            </div>
+
+            <!-- Step 1 Card: Request Code -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4" id="step1Card">
+                <h5 class="fw-bold text-dark mb-3"><span class="badge bg-primary rounded-circle me-2">1</span> Enter Purchase Points</h5>
+                <form id="requestCodeForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Points to Accrue</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 fw-bold">⭐</span>
+                            <input type="number" id="pointsInput" class="form-control form-control-lg rounded-end-pill px-3" placeholder="e.g. 50" min="1" max="10000" required />
+                        </div>
+                        <div class="form-text small text-muted">Typical earn rate: 1 point per RM1 spent.</div>
+                    </div>
+                    <button type="submit" id="requestCodeBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                        Generate Verification Code →
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 2 Card: Cashier Verification (Hidden initially) -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4 d-none" id="step2Card">
+                <h5 class="fw-bold text-dark mb-3"><span class="badge bg-success rounded-circle me-2">2</span> Cashier Verification & Staff PIN</h5>
+
+                <div class="p-4 bg-light rounded-4 text-center mb-4 border">
+                    <span class="text-muted small text-uppercase fw-semibold d-block">Present this Code to Cashier:</span>
+                    <div class="display-4 fw-bold text-primary font-monospace my-2 tracking-wider" id="generatedCodeDisplay">------</div>
+                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill small">Valid for this transaction</span>
+                </div>
+
+                <form id="approveCodeForm">
+                    <input type="hidden" id="approvedCode" name="Code" />
+                    <input type="hidden" id="approvedPoints" name="Point" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Store Outlet Branch</label>
+                        <select id="outletSelect" name="OutletGUID" class="form-select rounded-pill px-3" required>
+                            <option value="">-- Select Store Outlet --</option>
+                            @foreach (var outlet in outlets)
+                            {
+                                <option value="@outlet.OutletGUID">@outlet.OutletName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Cashier Staff PIN 🔑</label>
+                        <input type="password" id="staffPinInput" name="Pin" class="form-control rounded-pill px-3 text-center fw-bold fs-5 tracking-wider" placeholder="123456" maxlength="6" required />
+                        <div class="form-text small text-muted">Cashier enters branch authorization PIN to credit points.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" id="cancelStep2Btn">← Re-enter Amount</button>
+                        <button type="submit" id="confirmApprovalBtn" class="btn btn-success rounded-pill px-4 fw-semibold">
+                            Approve & Credit Points
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('#requestCodeForm').submit(function (e) {
+        e.preventDefault();
+        const pts = parseInt($('#pointsInput').val());
+        if (pts <= 0) {
+            Swal.fire('Validation Error', 'Points must be greater than zero.', 'error');
+            return;
+        }
+
+        const $btn = $('#requestCodeBtn');
+        $btn.prop('disabled', true).text('Generating...');
+
+        $.post('/Member/RequestPointCode', { Point: pts }, function (res) {
+            $btn.prop('disabled', false).text('Generate Verification Code →');
+            if (res.success) {
+                $('#step1Card').addClass('d-none');
+                $('#step2Card').removeClass('d-none');
+                $('#generatedCodeDisplay').text(res.code);
+                $('#approvedCode').val(res.code);
+                $('#approvedPoints').val(res.point);
+            } else {
+                Swal.fire('Error', res.msg, 'error');
+            }
+        });
+    });
+
+    $('#cancelStep2Btn').click(function () {
+        $('#step2Card').addClass('d-none');
+        $('#step1Card').removeClass('d-none');
+    });
+
+    $('#approveCodeForm').submit(function (e) {
+        e.preventDefault();
+        const $btn = $('#confirmApprovalBtn');
+        $btn.prop('disabled', true).text('Verifying...');
+
+        $.post('/Member/ApprovePoints', $(this).serialize(), function (res) {
+            $btn.prop('disabled', false).text('Approve & Credit Points');
+            if (res.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Points Credited! ⭐',
+                    text: res.msg,
+                    confirmButtonColor: '#059669'
+                }).then(() => {
+                    window.location.href = '/Member/Index';
+                });
+            } else {
+                Swal.fire('Verification Failed', res.msg, 'error');
+            }
+        });
+    });
+</script>
+}
+

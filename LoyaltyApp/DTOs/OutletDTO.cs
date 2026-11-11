@@ -20,5 +20,22 @@ namespace LoyaltyApp.DTOs
     {
         public string OutletName { get; set; } = string.Empty;
     }
-}
 
+    public class OutletStaffDTO
+    {
+        public int OutletStaffID { get; set; }
+        public string? OutletStaffName { get; set; }
+        public string? Pin { get; set; }
+        public string? Role { get; set; }
+        public int? OutletID { get; set; }
+        public OutletDTO? Outlet { get; set; }
+    }
+
+    public class CreateOutletStaffDTO
+    {
+        public string OutletStaffName { get; set; } = string.Empty;
+        public string Pin { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public int OutletID { get; set; }
+    }
+}

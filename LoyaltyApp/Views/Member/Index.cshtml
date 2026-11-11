@@ -1,53 +1,129 @@
-﻿@{
+@model LoyaltyApp.DTOs.MemberDTO
+@{
     ViewData["Title"] = "Member Dashboard";
+    var highlights = ViewBag.Highlights as List<LoyaltyApp.DTOs.HighlightDTO> ?? new List<LoyaltyApp.DTOs.HighlightDTO>();
 }
 
 <div class="container py-4">
-    <!-- Welcome Banner Hero Section -->
-    <div class="p-5 mb-4 bg-light rounded-4 shadow-sm border-0 bg-white border">
-        <div class="container-fluid py-2">
-            <h1 class="display-5 fw-bold text-primary">Welcome Back!</h1>
-            <p class="col-md-8 fs-5 text-muted">Here is a quick look at your loyalty status. Explore your profile or check back for upcoming rewards.</p>
-            <a href="/Member/Details" class="btn btn-primary btn-lg px-4 shadow-sm mt-2">View Profile Details</a>
+    <!-- Promotional Highlights Carousel -->
+    @if (highlights.Any())
+    {
+        <div id="promoCarousel" class="carousel slide mb-4 rounded-4 overflow-hidden shadow-sm" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                @for (int i = 0; i < highlights.Count; i++)
+                {
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"></button>
+                }
+            </div>
+            <div class="carousel-inner">
+                @for (int i = 0; i < highlights.Count; i++)
+                {
+                    var h = highlights[i];
+                    <div class="carousel-item @(i == 0 ? "active" : "")" style="min-height: 240px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;">
+                        <div class="container p-5">
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">🔥 Featured Special</span>
+                            <h2 class="fw-bold mb-1">@h.Title</h2>
+                            <h5 class="text-light mb-3">@h.SubTitle</h5>
+                            <p class="mb-0 col-md-8 small text-white-50">@h.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    }
+
+    <!-- Welcome Hero Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">Loyalty Member</span>
+                <h2 class="fw-bold text-dark mb-1">Welcome back, @(string.IsNullOrWhiteSpace(Model?.Name) ? "Valued Member" : Model.Name)! 👋</h2>
+                <p class="text-muted small mb-0">Referral Code: <span class="badge bg-light text-dark border px-2 py-1 font-monospace">@(Model?.ReferralCode ?? "N/A")</span> | Phone: @(Model?.PhoneNumber ?? "-")</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/Member/CollectPoints" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">+ Collect Points</a>
+                <a href="/Member/Details" class="btn btn-outline-secondary rounded-pill px-3">My Profile</a>
+            </div>
         </div>
     </div>
 
-    <!-- Quick Stats / Feature Cards -->
+    <!-- Quick Stats Cards -->
     <div class="row g-4 mb-4">
         <!-- Points Card -->
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center p-4">
-                    <div class="mb-2 text-primary fs-1">⭐</div>
-                    <h5 class="card-title fw-bold">Reward Points</h5>
-                    <p class="card-text display-6 fw-bold text-dark my-2">350</p>
-                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">Ready to use</span>
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 border-start border-primary border-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Reward Points</span>
+                    <span class="fs-4">⭐</span>
                 </div>
+                <div class="display-6 fw-bold text-primary my-1">@(Model?.Point ?? 0)</div>
+                <span class="text-muted small">Available points for catalog redemption</span>
             </div>
         </div>
 
-        <!-- Tier Status Card -->
+        <!-- Tier Card -->
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center p-4">
-                    <div class="mb-2 text-success fs-1">🏆</div>
-                    <h5 class="card-title fw-bold">Membership Tier</h5>
-                    <p class="card-text fs-3 fw-bold text-success my-3">Gold Member</p>
-                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">Active Status</span>
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 border-start border-success border-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Membership Tier</span>
+                    <span class="fs-4">🏆</span>
                 </div>
+                <div class="display-6 fw-bold text-success my-1">@(Model?.Tier ?? "Gold")</div>
+                <span class="text-muted small">Active tier privileges unlocked</span>
             </div>
         </div>
 
-        <!-- Vouchers Card -->
+        <!-- Quick Access Card -->
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center p-4">
-                    <div class="mb-2 text-info fs-1">🎁</div>
-                    <h5 class="card-title fw-bold">Available Vouchers</h5>
-                    <p class="card-text display-6 fw-bold text-dark my-2">2</p>
-                    <span class="badge bg-info-subtle text-info px-3 py-2 rounded-pill">Check rewards</span>
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4 border-start border-info border-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Exclusive Perks</span>
+                    <span class="fs-4">🎁</span>
                 </div>
+                <div class="d-flex gap-2 my-2">
+                    <a href="/Member/Rewards" class="btn btn-sm btn-outline-primary rounded-pill px-3">Browse Rewards</a>
+                    <a href="/Member/Vouchers" class="btn btn-sm btn-outline-info rounded-pill px-3">My Vouchers</a>
+                </div>
+                <span class="text-muted small">Check active vouchers & gifts</span>
             </div>
+        </div>
+    </div>
+
+    <!-- Navigation Shortcuts Grid -->
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a href="/Member/Rewards" class="card border-0 shadow-sm rounded-4 text-decoration-none p-3 text-center bg-white h-100 hover-card">
+                <div class="fs-1 mb-2">🎁</div>
+                <h6 class="fw-bold text-dark mb-1">Rewards Store</h6>
+                <span class="text-muted small">Redeem gifts with points</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/Member/Vouchers" class="card border-0 shadow-sm rounded-4 text-decoration-none p-3 text-center bg-white h-100 hover-card">
+                <div class="fs-1 mb-2">🎟️</div>
+                <h6 class="fw-bold text-dark mb-1">My Vouchers</h6>
+                <span class="text-muted small">View discount vouchers</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/Member/History" class="card border-0 shadow-sm rounded-4 text-decoration-none p-3 text-center bg-white h-100 hover-card">
+                <div class="fs-1 mb-2">📜</div>
+                <h6 class="fw-bold text-dark mb-1">Activity History</h6>
+                <span class="text-muted small">Points & redemption log</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/Member/Feedback" class="card border-0 shadow-sm rounded-4 text-decoration-none p-3 text-center bg-white h-100 hover-card">
+                <div class="fs-1 mb-2">💬</div>
+                <h6 class="fw-bold text-dark mb-1">Send Feedback</h6>
+                <span class="text-muted small">Share store experience</span>
+            </a>
         </div>
     </div>
 </div>

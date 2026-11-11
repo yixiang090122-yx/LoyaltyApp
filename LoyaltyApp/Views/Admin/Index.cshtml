@@ -1,124 +1,124 @@
-﻿@{
+@{
     ViewData["Title"] = "Admin Dashboard";
+    var totalMembers = ViewBag.TotalMembers ?? 0;
+    var activeRewards = ViewBag.ActiveRewards ?? 0;
+    var activeVouchers = ViewBag.ActiveVouchers ?? 0;
+    var totalPoints = ViewBag.TotalPointRecords ?? 0;
+    var recentMembers = ViewBag.RecentMembers as List<LoyaltyApp.DTOs.MemberDTO> ?? new List<LoyaltyApp.DTOs.MemberDTO>();
+    var recentPoints = ViewBag.RecentPoints as List<LoyaltyApp.DTOs.PointRecordDTO> ?? new List<LoyaltyApp.DTOs.PointRecordDTO>();
 }
 
-<!-- Custom CSS for SaaS-style micro-interactions -->
 <style>
     .hover-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }
 
-        .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
-        }
-
-    .avatar-initial {
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
+    .hover-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
     }
 </style>
 
 <div class="container-fluid py-4 px-4 bg-light min-vh-100">
 
-    <!-- Top Bar: Header & Search Function -->
+    <!-- Top Bar: Header & Quick Actions -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">Admin Dashboard 🚀</h1>
-            <p class="text-muted small mb-0">Real-time metrics and system overview for LoyaltyApp.</p>
+            <p class="text-muted small mb-0">Real-time metrics, system operations, and audit overview for LoyaltyApp.</p>
         </div>
 
-        <!-- Requirement A2: Search function -->
         <div class="d-flex align-items-center gap-2">
-            <div class="input-group shadow-sm bg-white rounded-pill overflow-hidden border" style="max-width: 320px;">
+            <div class="input-group shadow-sm bg-white rounded-pill overflow-hidden border" style="max-width: 300px;">
                 <span class="input-group-text bg-transparent border-0 text-muted ps-3">🔍</span>
-                <input type="text" id="dashboardSearch" class="form-control border-0 shadow-none ps-0" placeholder="Search members, rewards...">
+                <input type="text" id="dashboardSearch" class="form-control border-0 shadow-none ps-0" placeholder="Quick search...">
             </div>
-            <button class="btn btn-dark shadow-sm rounded-pill px-4 text-nowrap fw-semibold">+ Quick Action</button>
+            <a href="/Admin/Members" class="btn btn-dark shadow-sm rounded-pill px-4 text-nowrap fw-semibold">Manage Members</a>
         </div>
     </div>
 
-    <!-- Requirement A2: Summary Cards (With Hover Elevation) -->
+    <!-- Summary Cards -->
     <div class="row g-4 mb-4">
         <!-- Card 1: Total Members -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-primary border-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted small fw-semibold text-uppercase tracking-wider">Total Members</span>
-                    <span class="p-2 bg-primary-subtle text-primary rounded-3 small">👥</span>
+            <a href="/Admin/Members" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-primary border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small fw-semibold text-uppercase">Total Members</span>
+                        <span class="p-2 bg-primary-subtle text-primary rounded-3 small">👥</span>
+                    </div>
+                    <div class="d-flex align-items-baseline justify-content-between mt-2">
+                        <span class="fs-3 fw-bold text-dark">@totalMembers</span>
+                        <span class="badge bg-success-subtle text-success rounded-pill small fw-bold">Live</span>
+                    </div>
+                    <span class="text-muted small mt-2 d-block">Registered user accounts</span>
                 </div>
-                <div class="d-flex align-items-baseline justify-content-between mt-2">
-                    <span class="fs-3 fw-bold text-dark">1,482</span>
-                    <span class="badge bg-success-subtle text-success rounded-pill small fw-bold">↑ 12%</span>
-                </div>
-                <span class="text-muted small mt-2 d-block">Active accounts registered</span>
-            </div>
+            </a>
         </div>
 
         <!-- Card 2: Active Rewards -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-success border-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted small fw-semibold text-uppercase tracking-wider">Active Rewards</span>
-                    <span class="p-2 bg-success-subtle text-success rounded-3 small">🎁</span>
+            <a href="/Admin/Rewards" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-success border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small fw-semibold text-uppercase">Active Rewards</span>
+                        <span class="p-2 bg-success-subtle text-success rounded-3 small">🎁</span>
+                    </div>
+                    <div class="d-flex align-items-baseline justify-content-between mt-2">
+                        <span class="fs-3 fw-bold text-dark">@activeRewards</span>
+                        <span class="badge bg-success-subtle text-success rounded-pill small fw-bold">Catalog</span>
+                    </div>
+                    <span class="text-muted small mt-2 d-block">Available for point redemption</span>
                 </div>
-                <div class="d-flex align-items-baseline justify-content-between mt-2">
-                    <span class="fs-3 fw-bold text-dark">38</span>
-                    <span class="badge bg-success-subtle text-success rounded-pill small fw-bold">Live</span>
-                </div>
-                <span class="text-muted small mt-2 d-block">Available for redemption</span>
-            </div>
+            </a>
         </div>
 
         <!-- Card 3: Active Vouchers -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-warning border-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted small fw-semibold text-uppercase tracking-wider">Active Vouchers</span>
-                    <span class="p-2 bg-warning-subtle text-warning rounded-3 small">🎟️</span>
+            <a href="/Admin/Vouchers" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-warning border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small fw-semibold text-uppercase">Active Vouchers</span>
+                        <span class="p-2 bg-warning-subtle text-warning rounded-3 small">🎟️</span>
+                    </div>
+                    <div class="d-flex align-items-baseline justify-content-between mt-2">
+                        <span class="fs-3 fw-bold text-dark">@activeVouchers</span>
+                        <span class="badge bg-warning-subtle text-warning rounded-pill small fw-bold">Campaigns</span>
+                    </div>
+                    <span class="text-muted small mt-2 d-block">Discount promotions available</span>
                 </div>
-                <div class="d-flex align-items-baseline justify-content-between mt-2">
-                    <span class="fs-3 fw-bold text-dark">126</span>
-                    <span class="badge bg-warning-subtle text-warning rounded-pill small fw-bold">Expiring soon</span>
-                </div>
-                <span class="text-muted small mt-2 d-block">Claimed by members</span>
-            </div>
+            </a>
         </div>
 
         <!-- Card 4: Point Records -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-info border-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted small fw-semibold text-uppercase tracking-wider">Point Records</span>
-                    <span class="p-2 bg-info-subtle text-info rounded-3 small">⭐</span>
+            <a href="/Admin/PointRecords" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 hover-card border-start border-info border-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small fw-semibold text-uppercase">Point Records</span>
+                        <span class="p-2 bg-info-subtle text-info rounded-3 small">⭐</span>
+                    </div>
+                    <div class="d-flex align-items-baseline justify-content-between mt-2">
+                        <span class="fs-3 fw-bold text-dark">@totalPoints</span>
+                        <span class="badge bg-info-subtle text-info rounded-pill small fw-bold">Transactions</span>
+                    </div>
+                    <span class="text-muted small mt-2 d-block">Global point activities</span>
                 </div>
-                <div class="d-flex align-items-baseline justify-content-between mt-2">
-                    <span class="fs-3 fw-bold text-dark">9,420</span>
-                    <span class="badge bg-info-subtle text-info rounded-pill small fw-bold">Today</span>
-                </div>
-                <span class="text-muted small mt-2 d-block">Total transactions logged</span>
-            </div>
+            </a>
         </div>
     </div>
 
-    <!-- Requirement A2: Chart & Recent Activity Row -->
+    <!-- Chart & Recent Activity Row -->
     <div class="row g-4 mb-4">
-        <!-- Chart Section with Gradient Fill -->
+        <!-- Chart Section -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h5 class="fw-bold text-dark mb-0">Points Redeemed Overview</h5>
-                        <p class="text-muted small mb-0">Analytics tracking across the current week</p>
+                        <h5 class="fw-bold text-dark mb-0">Points Activity Analytics</h5>
+                        <p class="text-muted small mb-0">Weekly transaction trend across all outlet stores</p>
                     </div>
-                    <select class="form-select form-select-sm w-auto rounded-pill px-3">
-                        <option value="7">Last 7 Days</option>
-                        <option value="30">Last 30 Days</option>
-                    </select>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">7 Days Rolling</span>
                 </div>
                 <div style="height: 310px; position: relative;">
                     <canvas id="pointsChart"></canvas>
@@ -126,35 +126,31 @@
             </div>
         </div>
 
-        <!-- Recent System Logs Panel -->
+        <!-- Recent Activity Logs Panel -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h5 class="fw-bold text-dark mb-3">Recent System Logs</h5>
+                <h5 class="fw-bold text-dark mb-3">Recent Member Registrations</h5>
                 <div class="d-flex flex-column gap-3">
-                    <div class="d-flex align-items-center gap-3 p-2 rounded-3 bg-light">
-                        <div class="avatar-initial bg-primary-subtle text-primary rounded-circle">SJ</div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark small">Sarah Jenkins</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">New member registered</div>
-                        </div>
-                        <span class="text-muted small">2m ago</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-3 p-2 rounded-3 bg-light">
-                        <div class="avatar-initial bg-success-subtle text-success rounded-circle">RC</div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark small">RM50 Voucher</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Reward claimed (#409)</div>
-                        </div>
-                        <span class="text-muted small">15m ago</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-3 p-2 rounded-3 bg-light">
-                        <div class="avatar-initial bg-warning-subtle text-warning rounded-circle">OP</div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark small">Outlet #02</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Receipt verification pending</div>
-                        </div>
-                        <span class="text-muted small">1h ago</span>
-                    </div>
+                    @if (recentMembers.Any())
+                    {
+                        @foreach (var m in recentMembers)
+                        {
+                            <div class="d-flex align-items-center gap-3 p-2 rounded-3 bg-light">
+                                <div class="p-2 bg-primary-subtle text-primary rounded-circle fw-bold" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                                    @(!string.IsNullOrEmpty(m.Name) ? m.Name[0].ToString().ToUpper() : "M")
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-semibold text-dark small text-truncate">@m.Name</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">@m.PhoneNumber</div>
+                                </div>
+                                <span class="badge bg-white border text-primary small">@m.Points pts</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted small text-center py-4">No recent activities logged yet.</div>
+                    }
                 </div>
             </div>
         </div>
@@ -162,48 +158,37 @@
 
 </div>
 
-<!-- Chart.js Script with Smooth Gradient Fill -->
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const ctx = document.getElementById('pointsChart').getContext('2d');
-
-        // Create gradient fill for the chart
         const gradient = ctx.createLinearGradient(0, 0, 0, 300);
         gradient.addColorStop(0, 'rgba(13, 110, 253, 0.25)');
         gradient.addColorStop(1, 'rgba(13, 110, 253, 0.0)');
 
-        const pointsChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 datasets: [{
-                    label: 'Points Redeemed',
-                    data: [1200, 1900, 1500, 2500, 2200, 3800, 4100],
+                    label: 'Points Distributed',
+                    data: [150, 280, 210, 420, 390, 560, 680],
                     borderColor: '#0d6efd',
                     backgroundColor: gradient,
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
                     pointBackgroundColor: '#0d6efd',
-                    pointRadius: 4,
-                    pointHoverRadius: 6
+                    pointRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [4, 4], color: '#f1f1f1' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f1f1' } },
+                    x: { grid: { display: false } }
                 }
             }
         });

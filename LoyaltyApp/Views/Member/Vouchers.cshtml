@@ -1,0 +1,152 @@
+@model List<LoyaltyApp.DTOs.VoucherDTO>
+@{
+    ViewData["Title"] = "My Vouchers";
+}
+
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill fw-semibold mb-2">Voucher Wallet</span>
+                <h1 class="h3 fw-bold text-dark mb-1">My Available Vouchers 🎟️</h1>
+                <p class="text-muted small mb-0">Present these vouchers at the counter to enjoy discounts and complimentary items.</p>
+            </div>
+            <a href="/Outlet/Locations" class="btn btn-outline-primary rounded-pill px-4">Find Branches 📍</a>
+        </div>
+    </div>
+
+    <!-- Vouchers Grid -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var voucher in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden hover-card border-top border-warning border-4">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-warning-subtle text-dark fw-bold px-3 py-1 rounded-pill">
+                                    @(voucher.ShortTitle ?? "Special Voucher")
+                                </span>
+                                <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 small">
+                                    Ready to Use
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-1">@voucher.VoucherName</h5>
+                            <h6 class="text-primary small mb-2">@voucher.Subtitle</h6>
+                            <p class="text-muted small mb-3">@voucher.Description</p>
+
+                            @if (!string.IsNullOrEmpty(voucher.TNC))
+                            {
+                                <div class="bg-light p-2 rounded-3 small text-muted mb-3" style="font-size: 0.75rem;">
+                                    <strong>Terms:</strong> @voucher.TNC
+                                </div>
+                            }
+
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">
+                                    Valid until: @(voucher.ExpiredDate?.ToString("yyyy-MM-dd") ?? "Ongoing")
+                                </span>
+                                <button class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold redeem-voucher-btn"
+                                        data-guid="@voucher.VoucherGUID"
+                                        data-name="@voucher.VoucherName">
+                                    Use Voucher
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
+                    <div class="fs-1 mb-2">🎟️</div>
+                    <h5>No active vouchers in your wallet</h5>
+                    <p class="small mb-0">Stay tuned for promotional campaigns and special holiday gifts!</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Redeem Voucher -->
+<div class="modal fade" id="redeemVoucherModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Redeem Voucher at Outlet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-light rounded-4 mb-4 text-center">
+                    <span class="text-muted small d-block">Voucher to Apply:</span>
+                    <h5 id="modalVoucherName" class="fw-bold text-primary mb-0">-</h5>
+                </div>
+
+                <form id="redeemVoucherForm">
+                    <input type="hidden" id="modalVoucherGUID" name="VoucherGUID" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Your Member Password</label>
+                        <input type="password" id="modalVoucherMemberPassword" name="MemberPassword" class="form-control rounded-pill px-3" placeholder="Enter member password" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Store Staff PIN 🔑</label>
+                        <input type="password" id="modalVoucherStaffPin" name="OutletStaffPin" class="form-control rounded-pill px-3 text-center fw-bold fs-5 tracking-wider" placeholder="123456" maxlength="6" required />
+                        <div class="form-text small text-muted">Cashier verifies and enters branch PIN.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="confirmVoucherRedeemBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">Apply & Claim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('.redeem-voucher-btn').click(function () {
+        const guid = $(this).data('guid');
+        const name = $(this).data('name');
+
+        $('#modalVoucherGUID').val(guid);
+        $('#modalVoucherName').text(name);
+        $('#redeemVoucherForm')[0].reset();
+        $('#modalVoucherGUID').val(guid);
+
+        new bootstrap.Modal(document.getElementById('redeemVoucherModal')).show();
+    });
+
+    $('#redeemVoucherForm').submit(function (e) {
+        e.preventDefault();
+        const $btn = $('#confirmVoucherRedeemBtn');
+        $btn.prop('disabled', true).text('Validating...');
+
+        $.post('/Member/RedeemVoucher', $(this).serialize(), function (res) {
+            $btn.prop('disabled', false).text('Apply & Claim');
+            if (res.success) {
+                $('#redeemVoucherModal').modal('hide');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Claimed Successfully! 🎟️',
+                    text: res.msg,
+                    confirmButtonColor: '#0d6efd'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire('Claim Failed', res.msg, 'error');
+            }
+        }).fail(function () {
+            $btn.prop('disabled', false).text('Apply & Claim');
+            Swal.fire('Error', 'Unable to redeem voucher at this time.', 'error');
+        });
+    });
+</script>
+}
+

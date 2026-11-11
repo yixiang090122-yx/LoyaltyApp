@@ -41,23 +41,49 @@
     {
         <!-- ADMIN NAVBAR / TOP BAR -->
         <header>
-            <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 shadow-sm">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3 shadow-sm py-2">
                 <div class="container-fluid">
                     <a class="navbar-brand fw-bold" href="/Admin/Index">⚡ Admin Portal</a>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1 ms-3 gap-1">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavCollapse">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="adminNavCollapse">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
                             <li class="nav-item">
                                 <a class="nav-link text-light px-3 rounded-pill" asp-controller="Admin" asp-action="Index">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-light px-3 rounded-pill" asp-controller="Outlet" asp-action="Index">Manage Outlets</a>
+                                <a class="nav-link text-light px-3 rounded-pill" asp-controller="Admin" asp-action="Members">Members</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-light px-3 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
+                                    Catalog
+                                </a>
+                                <ul class="dropdown-menu shadow border-0 rounded-3">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Rewards">🎁 Rewards</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Vouchers">🎟️ Vouchers</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Highlights">🔥 Promotional Banners</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-light px-3 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
+                                    Operations
+                                </a>
+                                <ul class="dropdown-menu shadow border-0 rounded-3">
+                                    <li><a class="dropdown-item" asp-controller="Outlet" asp-action="Index">🏬 Outlets & Staff PINs</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="PointRecords">⭐ Points Ledger</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="RedemptionRecords">📜 Redemptions Audit</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light px-3 rounded-pill" asp-controller="Admin" asp-action="Feedback">Feedback</a>
                             </li>
                         </ul>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <form id="adminLogoutForm" asp-controller="Account" asp-action="AdminLogout" method="post" class="mb-0">
-                            <button type="button" id="confirmAdminLogoutBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">Admin Logout</button>
-                        </form>
+                        <div class="d-flex align-items-center">
+                            <form id="adminLogoutForm" asp-controller="Account" asp-action="AdminLogout" method="post" class="mb-0">
+                                <button type="button" id="confirmAdminLogoutBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">Admin Logout</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -83,10 +109,16 @@
                         <!-- Navigation Links -->
                         <ul class="navbar-nav flex-grow-1 ms-3 gap-1">
                             <li class="nav-item">
-                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Home" asp-action="Index">Dashboard</a>
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="Index">Dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="Rewards">Rewards</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="Vouchers">Vouchers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="CollectPoints">Collect Points</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="History">History</a>
@@ -94,14 +126,17 @@
                             <li class="nav-item">
                                 <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Outlet" asp-action="Locations">Outlets</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="Feedback">Feedback</a>
+                            </li>
                         </ul>
 
-                        <!-- Right Side: Points Badge & Logout -->
-                        <ul class="navbar-nav align-items-center gap-3 me-2">
+                        <!-- Right Side: Profile & Logout -->
+                        <ul class="navbar-nav align-items-center gap-2 me-2">
                             <li class="nav-item">
-                                <span class="points-badge shadow-sm">
-                                    ⭐ 450 Pts
-                                </span>
+                                <a href="/Member/Details" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                                    👤 My Profile
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="mb-0">
