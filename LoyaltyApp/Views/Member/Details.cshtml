@@ -1,0 +1,70 @@
+﻿@using LoyaltyApp.DTOs
+@model MemberDTO
+
+@{
+    ViewData["Title"] = "Member Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Profile Card -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+                <!-- Card Header Banner -->
+                <div class="bg-primary bg-gradient p-4 text-center text-white">
+                    <div class="mb-3">
+                        <span class="d-inline-flex justify-content-center align-items-center bg-white text-primary rounded-circle shadow-sm" style="width: 80px; height: 80px; font-size: 2.5rem; font-weight: bold;">
+                            @(!string.IsNullOrEmpty(Model.Name) ? Model.Name[0].ToString().ToUpper() : "U")
+                        </span>
+                    </div>
+                    <h3 class="fw-bold mb-0">@Model.Name</h3>
+                    <p class="text-white-50 small mb-0">Loyalty App Member</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 text-muted border-bottom pb-2">Personal Details</h5>
+
+                    <!-- Full Name -->
+                    <div class="d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                        <div class="fs-4 text-primary me-3">👤</div>
+                        <div>
+                            <div class="text-muted small fw-semibold">Full Name</div>
+                            <div class="fw-bold text-dark fs-6">@Model.Name</div>
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                        <div class="fs-4 text-primary me-3">✉️</div>
+                        <div>
+                            <div class="text-muted small fw-semibold">Email Address</div>
+                            <div class="fw-bold text-dark fs-6">@Model.Email</div>
+                        </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3">
+                        <div class="fs-4 text-primary me-3">📱</div>
+                        <div>
+                            <div class="text-muted small fw-semibold">Phone Number</div>
+                            <div class="fw-bold text-dark fs-6">@Model.PhoneNumber</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="/Member/Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                            ← Back to Dashboard
+                        </a>
+                        <button type="button" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

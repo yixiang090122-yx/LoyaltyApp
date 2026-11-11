@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "Member Dashboard";
+}
+
+<div class="container py-4">
+    <!-- Welcome Banner Hero Section -->
+    <div class="p-5 mb-4 bg-light rounded-4 shadow-sm border-0 bg-white border">
+        <div class="container-fluid py-2">
+            <h1 class="display-5 fw-bold text-primary">Welcome Back!</h1>
+            <p class="col-md-8 fs-5 text-muted">Here is a quick look at your loyalty status. Explore your profile or check back for upcoming rewards.</p>
+            <a href="/Member/Details" class="btn btn-primary btn-lg px-4 shadow-sm mt-2">View Profile Details</a>
+        </div>
+    </div>
+
+    <!-- Quick Stats / Feature Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Points Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-2 text-primary fs-1">⭐</div>
+                    <h5 class="card-title fw-bold">Reward Points</h5>
+                    <p class="card-text display-6 fw-bold text-dark my-2">350</p>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">Ready to use</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier Status Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-2 text-success fs-1">🏆</div>
+                    <h5 class="card-title fw-bold">Membership Tier</h5>
+                    <p class="card-text fs-3 fw-bold text-success my-3">Gold Member</p>
+                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">Active Status</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vouchers Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-2 text-info fs-1">🎁</div>
+                    <h5 class="card-title fw-bold">Available Vouchers</h5>
+                    <p class="card-text display-6 fw-bold text-dark my-2">2</p>
+                    <span class="badge bg-info-subtle text-info px-3 py-2 rounded-pill">Check rewards</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,222 @@
+@model List<LoyaltyApp.DTOs.OutletDTO>
+@{
+    ViewData["Title"] = "Manage Outlets";
+}
+
+<style>
+    .hover-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .hover-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
+    }
+</style>
+
+<div class="container-fluid py-4 px-4 bg-light min-vh-100">
+    <!-- Top Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/Admin/Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Dashboard</a>
+                <h1 class="h3 fw-bold text-dark mb-0">Store Outlets 🏬</h1>
+            </div>
+            <p class="text-muted small mt-1 mb-0">Manage all store branches, locations, and their operational statuses.</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary shadow-sm rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#createOutletModal">
+                + Add New Outlet
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white hover-card border-start border-primary border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Total Outlets</span>
+                <span class="fs-4 fw-bold text-dark mt-1">@(Model?.Count ?? 0)</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white hover-card border-start border-success border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Active Branches</span>
+                <span class="fs-4 fw-bold text-success mt-1">@(Model?.Count(o => o.OutletStatus == LoyaltyApp.DTOs.OutletStatus.Active) ?? 0)</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white hover-card border-start border-secondary border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Deactivated Branches</span>
+                <span class="fs-4 fw-bold text-secondary mt-1">@(Model?.Count(o => o.OutletStatus == LoyaltyApp.DTOs.OutletStatus.Deactive) ?? 0)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outlets Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">#ID</th>
+                        <th>Outlet Name</th>
+                        <th>Branch Identifier</th>
+                        <th>Created Date</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-muted">#@item.OutletID</td>
+                                <td class="fw-bold text-dark">
+                                    <span class="me-1">📍</span> @item.OutletName
+                                </td>
+                                <td>
+                                    <code class="small text-secondary">@(item.OutletGUID ?? "-")</code>
+                                </td>
+                                <td class="small text-muted">
+                                    @(item.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                </td>
+                                <td>
+                                    @if (item.OutletStatus == LoyaltyApp.DTOs.OutletStatus.Active)
+                                    {
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold">
+                                            ● Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 fw-semibold">
+                                            ○ Deactive
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 toggle-status-btn"
+                                            data-id="@item.OutletID"
+                                            data-name="@item.OutletName"
+                                            data-current-status="@item.OutletStatus">
+                                        Toggle Status
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <div class="fs-1 mb-2">🏬</div>
+                                <div>No outlets registered yet. Click <strong>+ Add New Outlet</strong> above to create one.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Outlet -->
+<div class="modal fade" id="createOutletModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Add Store Outlet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="createOutletForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Outlet Name</label>
+                        <input type="text" id="outletName" class="form-control rounded-pill px-3 py-2" placeholder="e.g. Mid Valley Megamall, Pavilion KL" required />
+                        <div class="form-text small text-muted">Enter the official branch or location name.</div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveOutletBtn" class="btn btn-primary rounded-pill px-4 fw-semibold">Save Outlet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Create Outlet Submission
+    $('#createOutletForm').submit(function (e) {
+        e.preventDefault();
+        const outletName = $('#outletName').val().trim();
+
+        if (!outletName) {
+            Swal.fire('Validation Error', 'Please enter a valid outlet name.', 'error');
+            return;
+        }
+
+        $('#saveOutletBtn').prop('disabled', true).text('Saving...');
+
+        $.post('/Outlet/Create', { outletName: outletName }, function (res) {
+            $('#saveOutletBtn').prop('disabled', false).text('Save Outlet');
+            if (res.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Created!',
+                    text: res.msg,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+            } else {
+                Swal.fire('Error', res.msg, 'error');
+            }
+        }).fail(function () {
+            $('#saveOutletBtn').prop('disabled', false).text('Save Outlet');
+            Swal.fire('Error', 'An unexpected error occurred while creating outlet.', 'error');
+        });
+    });
+
+    // Toggle Status
+    $(document).on('click', '.toggle-status-btn', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        Swal.fire({
+            title: 'Change status for ' + name + '?',
+            text: 'This will toggle the outlet between Active and Deactive.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, update status',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/Outlet/ToggleStatus/' + id, function (res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: res.msg,
+                            timer: 1200,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire('Failed', res.msg, 'error');
+                    }
+                }).fail(function () {
+                    Swal.fire('Error', 'Failed to communicate with server.', 'error');
+                });
+            }
+        });
+    });
+</script>
+}
+

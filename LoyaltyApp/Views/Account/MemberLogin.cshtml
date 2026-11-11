@@ -1,0 +1,126 @@
+﻿@{
+    Layout = null;
+}
+
+@using LoyaltyApp.ViewModels.Account;
+@model MemberLoginVM
+
+@{
+    ViewData["Title"] = "Member Login";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap 5 CDN (Guarantees styling loads properly) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="bg-light">
+
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 420px;">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-primary">Member Portal</h2>
+                    <p class="text-muted small">Welcome back! Please enter your details.</p>
+                </div>
+
+                <form id="submitForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" asp-for="PhoneNumber"></label>
+                        <input class="form-control form-control-lg" asp-for="PhoneNumber" placeholder="Enter your phone number" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" asp-for="Password"></label>
+                        <input class="form-control form-control-lg" asp-for="Password" type="password" placeholder="••••••••" />
+                    </div>
+
+                    <!-- Added an ID to the button so we can target it easily -->
+                    <button type="submit" id="loginBtn" class="btn btn-primary btn-lg w-100 shadow-sm mb-3">Sign In</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <span class="text-muted small">Are you an administrator?</span>
+                    <a href="/Account/AdminLogin" class="text-decoration-none fw-semibold ms-1">Admin Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SweetAlert2 library in <head> if you still want toast notifications, but for pure button feedback it's optional -->
+
+    <script>
+            $('#submitForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var $btn = $('#loginBtn');
+
+                // Reset state, disable button, show spinner
+                $btn.prop('disabled', true)
+                    .removeClass('btn-danger btn-success')
+                    .addClass('btn-primary')
+                    .html(`
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Loading...
+                        `);
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '/Account/MemberLogin',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Turn button green on success
+                            $btn.removeClass('btn-primary btn-danger')
+                                .addClass('btn-success')
+                                .text('Login Successful!');
+
+                            // Short delay so the user sees the green success state before redirecting
+                            setTimeout(function() {
+                                window.location.href = response.redirectUrl;
+                            }, 800);
+                        } else {
+                            // Turn button red on failure
+                            $btn.removeClass('btn-primary btn-success')
+                                .addClass('btn-danger')
+                                .text('Login Failed!');
+
+                            // Re-enable button after 2 seconds and restore default state
+                            setTimeout(function() {
+                                $btn.prop('disabled', false)
+                                    .removeClass('btn-danger')
+                                    .addClass('btn-primary')
+                                    .text('Sign In');
+                            }, 2000);
+                        }
+                    },
+                    error: function() {
+                        // Turn button red on server error
+                        $btn.removeClass('btn-primary btn-success')
+                            .addClass('btn-danger')
+                            .text('Error! Try Again');
+
+                        setTimeout(function() {
+                            $btn.prop('disabled', false)
+                                .removeClass('btn-danger')
+                                .addClass('btn-primary')
+                                .text('Sign In');
+                        }, 2000);
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

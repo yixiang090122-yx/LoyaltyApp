@@ -1,0 +1,171 @@
+@{
+    // Check if the current controller is Admin or if an Admin session exists
+    var isAdminPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ||
+                      !string.IsNullOrEmpty(Context.Session.GetString("AdminUser"));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LoyaltyApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+            .nav-link-custom {
+                font-weight: 500;
+                transition: all 0.2s ease;
+            }
+
+                .nav-link-custom:hover {
+                    color: #0d6efd !important;
+                    background-color: #f8f9fa;
+                }
+
+            .points-badge {
+                background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+                color: white;
+                font-weight: 600;
+                padding: 0.35rem 0.85rem;
+                border-radius: 50rem;
+                font-size: 0.85rem;
+            }
+    </style>
+</head>
+<body class="bg-light">
+
+    @if (isAdminPage)
+    {
+        <!-- ADMIN NAVBAR / TOP BAR -->
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 shadow-sm">
+                <div class="container-fluid">
+                    <a class="navbar-brand fw-bold" href="/Admin/Index">⚡ Admin Portal</a>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1 ms-3 gap-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-light px-3 rounded-pill" asp-controller="Admin" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light px-3 rounded-pill" asp-controller="Outlet" asp-action="Index">Manage Outlets</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <form id="adminLogoutForm" asp-controller="Account" asp-action="AdminLogout" method="post" class="mb-0">
+                            <button type="button" id="confirmAdminLogoutBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">Admin Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+    else
+    {
+        <!-- ADVANCED MEMBER NAVBAR -->
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm py-3 mb-4">
+                <div class="container-fluid">
+                    <!-- Brand / Logo -->
+                    <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2 ms-2" asp-controller="Home" asp-action="Index">
+                        <span>🌟</span> LoyaltyApp
+                    </a>
+
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <!-- Navigation Links -->
+                        <ul class="navbar-nav flex-grow-1 ms-3 gap-1">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Home" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="Rewards">Rewards</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Member" asp-action="History">History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom text-dark px-3 rounded-pill" asp-controller="Outlet" asp-action="Locations">Outlets</a>
+                            </li>
+                        </ul>
+
+                        <!-- Right Side: Points Badge & Logout -->
+                        <ul class="navbar-nav align-items-center gap-3 me-2">
+                            <li class="nav-item">
+                                <span class="points-badge shadow-sm">
+                                    ⭐ 450 Pts
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="mb-0">
+                                    <button type="button" id="confirmLogoutBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold">
+                                        🚪 Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Handles both Admin & Member Logout Confirmation -->
+    <script>
+            // Admin Logout
+            $(document).on('click', '#confirmAdminLogoutBtn', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Exit Admin Panel?',
+                    text: "You will be logged out of the admin session.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Log out',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('adminLogoutForm').submit();
+                    }
+                });
+            });
+
+            // Member Logout
+            $(document).on('click', '#confirmLogoutBtn', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You will be logged out of your session.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Log out',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('logoutForm').submit();
+                    }
+                });
+            });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

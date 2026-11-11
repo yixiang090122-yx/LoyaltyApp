@@ -1,0 +1,71 @@
+@model List<LoyaltyApp.DTOs.OutletDTO>
+@{
+    ViewData["Title"] = "Our Outlets";
+}
+
+<div class="container py-4">
+    <!-- Header Hero -->
+    <div class="p-5 mb-4 bg-white rounded-4 shadow-sm border">
+        <div class="container-fluid py-2">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">Branch Locator</span>
+            <h1 class="display-5 fw-bold text-dark">Our Store Outlets 🏬</h1>
+            <p class="col-md-8 fs-5 text-muted mb-0">
+                Visit any of our authorized branches to earn points, enjoy our latest seasonal specials, and redeem your vouchers and reward perks in person.
+            </p>
+        </div>
+    </div>
+
+    <!-- Outlets Grid -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="p-3 bg-primary-subtle text-primary rounded-4 fs-3">
+                                📍
+                            </div>
+                            @if (item.OutletStatus == LoyaltyApp.DTOs.OutletStatus.Active)
+                            {
+                                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold">
+                                    Open Now
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 fw-semibold">
+                                    Closed
+                                </span>
+                            }
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-1">@item.OutletName</h5>
+                        <p class="text-muted small mb-3">
+                            Branch ID: <code class="text-secondary">#@item.OutletID</code>
+                        </p>
+
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">
+                                Member redemptions available
+                            </span>
+                            <span class="text-primary fw-bold small">⭐ Accepted</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-5 text-center text-muted">
+                    <div class="fs-1 mb-2">🏬</div>
+                    <h5>No store branches currently listed</h5>
+                    <p class="small mb-0">Please check back later or contact customer support.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
